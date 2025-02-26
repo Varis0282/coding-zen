@@ -20,7 +20,7 @@ diaryEntrySchema.plugin(mongooseDelete, {
     overrideMethods: ['find', 'findOne', 'count', 'update', 'findById']
 });
 
-const DiaryEntry = mongoose.model('DiaryEntry', diaryEntrySchema);
+const DiaryEntry = mongoose.models.DiaryEntry || mongoose.model('DiaryEntry', diaryEntrySchema);
 
 const userSchema = new Schema(
     {
@@ -29,6 +29,6 @@ const userSchema = new Schema(
         password: { type: String, required: true },
     }, { timestamps: true }
 );
-const User = mongoose.model('User', userSchema);
+const User = mongoose.models.User || mongoose.model('User', userSchema);
 
 export { DiaryEntry, User };

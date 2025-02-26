@@ -3,12 +3,15 @@ import { DiaryEntry } from '@/mongoDb/schema';
 import bcrypt from 'bcryptjs';
 import { NextResponse } from 'next/server';
 import { successObj, errorObj } from '@/utils/response';
+import privateRoute from '@/utils/privateRoute';
 
 export async function POST(request: Request) {
     try {
         await connectToDatabase();
 
-        const { user, entryDate, summary, mood } = await request.json();
+        const { _id: user } = await privateRoute(request);
+
+        const { entryDate, summary, mood } = await request.json();
 
         const diary = new DiaryEntry({
             user: user,
