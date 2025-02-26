@@ -27,7 +27,9 @@ const LoginForm = () => {
         if (data.success) {
             message.success('User added successfully');
             const token = data.data.token;
-            localStorage.setItem('token', token);
+            if (typeof window !== 'undefined') {
+                localStorage.setItem('token', token);
+            }
             setLoading(false);
             window.location.href = '/';
         } else {

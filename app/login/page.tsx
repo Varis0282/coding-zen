@@ -9,7 +9,10 @@ import LoginForm from '@/components/login/LoginForm';
 export default function Login() {
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    let token: string | null = null;
+    if (typeof window === 'undefined') {
+      token = localStorage.getItem('token');
+    }
     if (token) {
       window.location.href = '/';
     }

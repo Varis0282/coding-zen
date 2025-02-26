@@ -24,6 +24,11 @@ const HomePage = () => {
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
     const validRange: [Dayjs, Dayjs] = [dayjs().subtract(30, 'day'), dayjs()];
+    let token: string | null = null;
+
+    if (typeof window !== 'undefined') {
+        token = localStorage.getItem('token');
+    }
 
     // 🔹 Fetch diary entries from API
     const getDiaryEntries = async () => {
@@ -32,7 +37,7 @@ const HomePage = () => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({}),
             });
@@ -143,7 +148,7 @@ const HomePage = () => {
                 method: method,
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(formattedEntry),
             });

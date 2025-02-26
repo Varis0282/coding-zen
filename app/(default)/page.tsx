@@ -7,21 +7,29 @@ import React, { useEffect } from 'react';
 
 export default function Home() {
 
+  let token: string | null = null;
+
+  if (typeof window !== 'undefined') {
+    token = localStorage.getItem('token');
+  }
+
   useEffect(() => {
     const getUserDetails = async () => {
       const userData = await fetch('/api/getUser', {
         method: 'POST',
         headers: {
           'Content-Type': 'application',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         }
       })
       const data = await userData.json();
-      if (data.success) {
+      if (data.success && typeof window !== 'undefined') {
         localStorage.setItem('user', JSON.stringify(data.data));
       } else {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+        }
         window.location.href = '/login';
       }
     }

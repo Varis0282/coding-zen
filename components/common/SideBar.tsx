@@ -24,7 +24,7 @@ const SideBar: React.FC<SideBarProps> = ({ collapsed }) => {
   };
 
   const handleMenuClick = (key: string) => {
-    if (key === 'logout') {
+    if (key === 'logout' && typeof window !== 'undefined') {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login';

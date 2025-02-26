@@ -10,7 +10,10 @@ import SignupForm from '@/components/signup/SignUpForm';
 export default function SignUp() {
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    let token: string | null = null;
+    if (typeof window === 'undefined') {
+      token = localStorage.getItem('token');
+    }
     if (token) {
       window.location.href = '/';
     }
