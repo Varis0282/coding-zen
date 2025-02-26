@@ -1,6 +1,7 @@
 import React from 'react';
 import { Layout, Menu } from 'antd';
 import { UserOutlined, VideoCameraOutlined, LogoutOutlined } from '@ant-design/icons';
+import { getCookie, removeCookie } from '@/utils/cookies';
 
 const { Sider } = Layout;
 
@@ -10,8 +11,7 @@ interface SideBarProps {
 
 const SideBar: React.FC<SideBarProps> = ({ collapsed }) => {
 
-  const user = localStorage.getItem('user');
-  const userName = user ? JSON.parse(user).name : '';
+  const userName = getCookie(null, 'userName');
   const siderStyle: React.CSSProperties = {
     overflow: 'auto',
     height: '100vh',
@@ -25,8 +25,9 @@ const SideBar: React.FC<SideBarProps> = ({ collapsed }) => {
 
   const handleMenuClick = (key: string) => {
     if (key === 'logout' && typeof window !== 'undefined') {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
+      removeCookie(null, 'token');
+      removeCookie(null, 'userName');
+      removeCookie(null, 'userId');
       window.location.href = '/login';
     }
   };

@@ -6,14 +6,12 @@ import HomePage from '@/components/home/HomePage';
 import React, { useEffect } from 'react';
 import LoginForm from '@/components/login/LoginForm';
 import SignupForm from '@/components/signup/SignUpForm';
+import { getCookie } from '@/utils/cookies';
 
 export default function SignUp() {
 
   useEffect(() => {
-    let token: string | null = null;
-    if (typeof window === 'undefined') {
-      token = localStorage.getItem('token');
-    }
+    const token = getCookie(null, 'token');
     if (token) {
       window.location.href = '/';
     }

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Calendar, Modal, Badge, Tooltip, Form, Select } from 'antd';
 import dayjs, { Dayjs } from 'dayjs';
 import TextArea from 'antd/es/input/TextArea';
+import { getCookie } from '@/utils/cookies';
 
 
 const moodColors: Record<string, "success" | "processing" | "warning" | "error" | "default" | undefined> = {
@@ -24,11 +25,7 @@ const HomePage = () => {
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
     const validRange: [Dayjs, Dayjs] = [dayjs().subtract(30, 'day'), dayjs()];
-    let token: string | null = null;
-
-    if (typeof window !== 'undefined') {
-        token = localStorage.getItem('token');
-    }
+    const token = getCookie(null, 'token');
 
     // 🔹 Fetch diary entries from API
     const getDiaryEntries = async () => {

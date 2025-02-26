@@ -1,3 +1,4 @@
+import { setCookie } from '@/utils/cookies';
 import { message } from 'antd';
 import React, { useState } from 'react';
 
@@ -27,9 +28,7 @@ const LoginForm = () => {
         if (data.success) {
             message.success('User added successfully');
             const token = data.data.token;
-            if (typeof window !== 'undefined') {
-                localStorage.setItem('token', token);
-            }
+            setCookie(null, 'token', token);
             setLoading(false);
             window.location.href = '/';
         } else {

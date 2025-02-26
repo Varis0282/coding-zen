@@ -4,14 +4,11 @@ import '@ant-design/v5-patch-for-react-19';
 import PageWithSideBar from '@/components/common/PageWithSidebar';
 import HomePage from '@/components/home/HomePage';
 import React, { useEffect } from 'react';
+import { getCookie, setCookie, removeCookie } from '@/utils/cookies';
 
 export default function Home() {
 
-  let token: string | null = null;
-
-  if (typeof window !== 'undefined') {
-    token = localStorage.getItem('token');
-  }
+  const token = getCookie(null, 'token');
 
   useEffect(() => {
     const getUserDetails = async () => {
@@ -24,11 +21,13 @@ export default function Home() {
       })
       const data = await userData.json();
       if (data.success && typeof window !== 'undefined') {
-        localStorage.setItem('user', JSON.stringify(data.data));
+        setCookie(null, 'userName', data.data.name);
+        setCookie(null, 'userId', data.data._id);
       } else {
         if (typeof window !== 'undefined') {
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
+          removeCookie(null, 'token');
+          removeCookie(null, 'userName');
+          removeCookie(null, 'userId');
         }
         window.location.href = '/login';
       }
