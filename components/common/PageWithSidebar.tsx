@@ -7,7 +7,7 @@ import SideBar from './SideBar';
 const { Header, Content } = Layout;
 
 const PageWithSideBar = ({ children }: { children: React.ReactNode }) => {
-    const [collapsed, setCollapsed] = useState(false);
+    const [collapsed, setCollapsed] = useState(true);
     const {
         token: { colorBgContainer, borderRadiusLG },
     } = theme.useToken();
@@ -30,8 +30,8 @@ const PageWithSideBar = ({ children }: { children: React.ReactNode }) => {
                         minHeight: '100vh',
                         background: colorBgContainer,
                         borderRadius: borderRadiusLG,
-                        marginTop: -64,
                     }}
+                    className='md:mt-[-64px]'
                 >
                     {children}
                 </Content>

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Calendar, Modal, Badge, Tooltip } from 'antd';
+import { Calendar, Modal, Badge, Tooltip, Form, Select } from 'antd';
 import dayjs, { Dayjs } from 'dayjs';
+import TextArea from 'antd/es/input/TextArea';
 
 
 const moodColors: Record<string, "success" | "processing" | "warning" | "error" | "default" | undefined> = {
@@ -12,12 +13,16 @@ const moodColors: Record<string, "success" | "processing" | "warning" | "error" 
     anxious: "warning"
 };
 
+const moodOptions = Object.keys(moodColors);
+
 const HomePage = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null);
+    const [dateId, setDateId] = useState<string | null>(null);
     const [diaryData, setDiaryData] = useState<any[]>([]);
     const [entriesByDate, setEntriesByDate] = useState<Record<string, any[]>>({});
-
+    const [form] = Form.useForm();
+    const [loading, setLoading] = useState(false);
     const validRange: [Dayjs, Dayjs] = [dayjs().subtract(30, 'day'), dayjs()];
 
     // 🔹 Fetch diary entries from API
@@ -56,6 +61,13 @@ const HomePage = () => {
     // 🔹 Open modal and show diary details for selected date
     const onSelectDate = (date: Dayjs) => {
         setSelectedDate(date);
+        const entry = entriesByDate[date.format('YYYY-MM-DD')];
+        setDateId(entry ? entry[0]._id : null);
+        form.setFieldsValue({
+            mood: entry ? entry[0].mood : undefined,
+            summary: entry ? entry[0].summary.join('\n') : '',
+            id: entry ? entry[0]._id : undefined
+        });
         setIsModalOpen(true);
     };
 
@@ -112,6 +124,42 @@ const HomePage = () => {
         ) : null;
     };
 
+    const handleSubmit = async () => {
+        setLoading(true);
+        try {
+            const values = await form.validateFields();
+            console.log('Received values:', values);
+            const formattedEntry = {
+                entryDate: selectedDate?.format('YYYY-MM-DD'),
+                mood: values.mood,
+                summary: values.summary.split('\n'),
+                _id: dateId
+            };
+
+            const method = selectedDate && entriesByDate[selectedDate.format('YYYY-MM-DD')] ? 'PUT' : 'POST';
+            const endpoint = method === 'PUT' ? '/api/mongo/updateDailyEntry' : '/api/mongo/addDailyEntry';
+
+            const response = await fetch(endpoint, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify(formattedEntry),
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                getDiaryEntries(); // Refresh the calendar
+                setIsModalOpen(false);
+            } else {
+                console.error('Error saving diary entry');
+            }
+        } catch (error) {
+            console.error('Validation error:', error);
+        }
+        setLoading(false);
+    };
 
 
     useEffect(() => {
@@ -121,35 +169,36 @@ const HomePage = () => {
     return (
         <div className="w-full">
             <Calendar onSelect={onSelectDate} validRange={validRange} cellRender={dateCellRender} />
-
             <Modal
-                title="Diary Entries"
+                title={selectedDate ? `Diary Entry for ${selectedDate.format('YYYY-MM-DD')}` : 'Diary Entry'}
                 open={isModalOpen}
-                onOk={handleOk}
+                onOk={handleSubmit}
                 onCancel={handleCancel}
+                confirmLoading={loading}
+                okText={selectedDate && entriesByDate[selectedDate.format('YYYY-MM-DD')] ? 'Update' : 'Add'}
             >
-                {selectedDate && (
-                    <div>
-                        <h3>{selectedDate.format('YYYY-MM-DD')}</h3>
-                        {entriesByDate[selectedDate.format('YYYY-MM-DD')]?.length > 0 ? (
-                            <ul>
-                                {entriesByDate[selectedDate.format('YYYY-MM-DD')].map((entry, index) => (
-                                    <li key={index}>
-                                        <p><strong>Mood:</strong> {entry.mood}</p>
-                                        <p><strong>Summary:</strong></p>
-                                        <ul>
-                                            {entry.summary.map((text: string, idx: number) => (
-                                                <li key={idx}>{text}</li>
-                                            ))}
-                                        </ul>
-                                    </li>
-                                ))}
-                            </ul>
-                        ) : (
-                            <p>No diary entry for this date.</p>
-                        )}
-                    </div>
-                )}
+                <Form form={form} layout="vertical">
+                    {/* Mood Selection */}
+                    <Form.Item name="mood" label="Mood" rules={[{ required: true, message: 'Please select a mood' }]}>
+                        <Select placeholder="Select a mood">
+                            {moodOptions.map((mood) => (
+                                <Select.Option key={mood} value={mood}>
+                                    <Badge status={moodColors[mood] || "default"} /> {mood}
+                                </Select.Option>
+                            ))}
+                        </Select>
+                    </Form.Item>
+
+                    {/* Summary Input */}
+                    <Form.Item
+                        name="summary"
+                        label="Summary"
+                        rules={[{ required: true, message: 'Please enter a summary' }]}
+                        help="Press Enter for a new line in the summary"
+                    >
+                        <TextArea rows={3} placeholder="Write about your day..." />
+                    </Form.Item>
+                </Form>
             </Modal>
         </div>
     );
