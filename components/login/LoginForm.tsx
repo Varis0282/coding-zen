@@ -26,7 +26,7 @@ const LoginForm = () => {
         })
         const data = await response.json();
         if (data.success) {
-            message.success('User added successfully');
+            message.success('User logged in successfully');
             const token = data.data.token;
             setCookie(null, 'token', token);
             setLoading(false);
